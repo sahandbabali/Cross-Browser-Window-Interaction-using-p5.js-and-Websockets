@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page 2</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"
+        integrity="sha512-2r+xZ/Dm8+HI0I8dsj1Jlfchv4O3DGfWbqRalmSGtgdbVQrZyGRqHp9ek8GKk1x8w01JsmDZRrJZ4DzgXkAU+g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/socket.io.js"></script>
+
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <!-- <h1>Welcome to Page 2</h1> -->
+
+
+
+    <script defer>
+
+
+        let window2 = {
+            x: window.screenX,
+            y: window.screenY + 130,
+            width: window.innerWidth,
+            height: window.innerHeight
+
+        }
+
+        let serverwinstate = {
+            "page1": { x: 0, y: 0, width: 100, height: 100 },
+            "page2": window2
+        }
+
+        let point2 = [serverwinstate.page2.width / 2, serverwinstate.page2.height / 2]
+
+
+        let socket = io('http://localhost:3000')
+
+        socket.on('connect', () => {
+            // connected to server
+            console.log(socket.id)
+
+        })
+
+        socket.on('getdata', (winstate) => {
+
+            serverwinstate = winstate
+
+            point2 = [serverwinstate.page2.width / 2, serverwinstate.page2.height / 2]
+
+            console.log(serverwinstate)
+
+        })
+
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            frameRate(60)
+
+        }
+
+        function draw() {
+            background(220);
+
+            drawCircle(point2[0], point2[1])
+
+            window2 = {
+                x: window.screenX,
+                y: window.screenY + 130,
+                width: window.innerWidth,
+                height: window.innerHeight
+
+            }
+
+            socket.emit('win2update', window2, socket.id)
+
+            let vector2 = createVector(serverwinstate.page1.x, serverwinstate.page1.y);
+            let vector1 = createVector(serverwinstate.page2.x, serverwinstate.page2.y);
+
+
+            let resultingVector = createVector(vector2.x - vector1.x, vector2.y - vector1.y);
+            //   console.log(resultingVector)
+
+            // draw the line
+            stroke(50)
+            strokeWeight(20)
+
+            line(point2[0], point2[1], resultingVector.x + serverwinstate.page1.width / 2, resultingVector.y + serverwinstate.page1.height / 2)
+
+        }
+
+        function drawCircle(x, y) {
+            fill(255, 0, 0);
+            ellipse(x, y, 150, 150);
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+
+        }
+
+    </script>
+</body>
+
+</html>
